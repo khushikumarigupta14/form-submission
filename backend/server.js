@@ -18,6 +18,5 @@ app.use("/api/form", formRoutes);
 
 // Connect to MongoDB
 connectDB();
-app.listen(config.PORT, () =>
-  console.log(`Server running on port ${config.PORT}`)
-);
+const port = config.PORT || 5001; // Use a different port
+app.listen(port, () => console.log(`Server running on port ${port}`));
