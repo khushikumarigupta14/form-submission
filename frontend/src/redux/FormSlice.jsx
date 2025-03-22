@@ -1,5 +1,10 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { submitFormData, fetchFormData } from "../api";
+import {
+  submitFormData,
+  fetchFormData,
+  updateFormData,
+  softDeleteFormData,
+} from "../api";
 
 // Initial state
 const initialState = {
@@ -33,7 +38,31 @@ export const fetchForm = createAsyncThunk(
     }
   }
 );
+//  Async Thunk to update form data (PUT)
+export const updateForm = createAsyncThunk(
+  "form/updateForm",
+  async ({ id, updatedData }, { rejectWithValue }) => {
+    try {
+      const response = await updateFormData(id, updatedData);
+      return response;
+    } catch (error) {
+      return rejectWithValue(error);
+    }
+  }
+);
 
+//  Async Thunk to soft delete form data (DELETE)
+export const deleteForm = createAsyncThunk(
+  "form/deleteForm",
+  async (id, { rejectWithValue }) => {
+    try {
+      const response = await softDeleteFormData(id);
+      return response;
+    } catch (error) {
+      return rejectWithValue(error);
+    }
+  }
+);
 // Create the form slice
 const formSlice = createSlice({
   name: "form",

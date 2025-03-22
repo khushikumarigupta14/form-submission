@@ -29,3 +29,22 @@ export const fetchFormData = async (id) => {
     throw error.response?.data?.message || "Failed to fetch form data";
   }
 };
+// Update form data (PUT)
+export const updateFormData = async (id, updatedData) => {
+  try {
+    const response = await api.put(`/api/form/${id}`, updatedData);
+    return response.data;
+  } catch (error) {
+    throw error.response?.data?.message || "Failed to update form data";
+  }
+};
+
+//  Soft delete form data (DELETE)
+export const softDeleteFormData = async (id) => {
+  try {
+    const response = await api.delete(`/api/form/${id}`);
+    return response.data;
+  } catch (error) {
+    throw error.response?.data?.message || "Failed to delete form data";
+  }
+};
