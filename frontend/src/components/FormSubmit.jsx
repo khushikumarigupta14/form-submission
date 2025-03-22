@@ -2,7 +2,8 @@ import React, { useEffect, useState } from "react";
 import { fetchForm, submitForm, updateForm } from "../redux/FormSlice";
 import { useNavigate, useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 const FormSubmit = () => {
   const { id } = useParams();
   const [formData, setFormData] = useState({
@@ -19,7 +20,11 @@ const FormSubmit = () => {
   });
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { formData: existingFormData } = useSelector((state) => state.form);
+  const {
+    formData: existingFormData,
+    loading,
+    error,
+  } = useSelector((state) => state.form);
 
   useEffect(() => {
     if (id) {
@@ -40,33 +45,49 @@ const FormSubmit = () => {
       [name]: type === "checkbox" ? checked : value,
     });
   };
+  const validateForm = () => {
+    if (!formData.firstName.trim() || !formData.lastName.trim()) {
+      toast.error("First Name and Last Name are required!");
+      return false;
+    }
+    if (!formData.email.includes("@")) {
+      toast.error("Invalid email format!");
+      return false;
+    }
+    if (!id && formData.password.length < 6) {
+      toast.error("Password must be at least 6 characters long!");
+      return false;
+    }
+    return true;
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!validateForm()) return;
     try {
       if (id) {
-        // Update existing form
         await dispatch(updateForm({ id, updatedData: formData })).unwrap();
-        alert("Form updated successfully!");
+        toast.success("Form updated successfully!");
       } else {
-        // Submit new form
         const response = await dispatch(submitForm(formData)).unwrap();
         navigate(`/form/${response.form._id}`);
-        alert("Form submitted successfully!");
+        toast.success("Form submitted successfully!");
       }
-      navigate("/");
     } catch (error) {
       console.error("Error:", error);
-      alert("Operation failed. Please try again.");
+      toast.error(error?.message || "Operation failed. Please try again.");
     }
   };
 
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
+      <ToastContainer />
       <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
         <h1 className="text-2xl font-bold text-blue-600 text-center mb-6">
           {id ? "Edit Intern Form" : "Submit Intern Form"}
         </h1>
+        {loading && <p className="text-center text-blue-500">Loading...</p>}
+        {error && <p className="text-center text-red-500">Error: {error}</p>}
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* First Name */}
           <div>
@@ -114,19 +135,21 @@ const FormSubmit = () => {
           </div>
 
           {/* Password */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Password:
-            </label>
-            <input
-              type="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              required
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-            />
-          </div>
+          {!id && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700">
+                Password:
+              </label>
+              <input
+                type="password"
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                required
+                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"
+              />
+            </div>
+          )}
 
           {/* Birth Date */}
           <div>
@@ -250,7 +273,7 @@ const FormSubmit = () => {
             type="submit"
             className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
           >
-            {id ? "Update" : "Submit"}
+            {loading ? "Processing..." : id ? "Update" : "Submit"}
           </button>
         </form>
       </div>

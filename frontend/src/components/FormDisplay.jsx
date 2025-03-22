@@ -2,7 +2,8 @@ import React, { useEffect } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchForm, deleteForm } from "../redux/FormSlice";
-
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 const FormDisplay = () => {
   const { id } = useParams();
   const dispatch = useDispatch();
@@ -16,18 +17,25 @@ const FormDisplay = () => {
   }, [dispatch, id]);
 
   if (!id) return <p>No form ID provided.</p>;
-  if (loading) return <p>Loading...</p>;
-  if (error) return <p>Error: {error}</p>;
+  if (loading) return <p className="text-center text-blue-500">Loading...</p>;
+  if (error) return <p className="text-center text-red-500">Error: {error}</p>;
 
   const handleDelete = async () => {
     if (window.confirm("Are you sure you want to delete this form?")) {
-      await dispatch(deleteForm(id));
-      navigate("/");
+      try {
+        await dispatch(deleteForm(id)).unwrap();
+        toast.success("Form deleted successfully!");
+        navigate("/");
+      } catch (error) {
+        toast.error("Failed to delete form.");
+        console.log(error);
+      }
     }
   };
 
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
+      <ToastContainer />
       <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
         <h1 className="text-2xl font-bold text-blue-600 text-center mb-6">
           Submitted Form Data
