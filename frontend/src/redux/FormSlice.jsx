@@ -77,7 +77,7 @@ const formSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      // Submit Form
+      // 🔹 Submit Form
       .addCase(submitForm.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -90,7 +90,8 @@ const formSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
-      // Fetch Form
+
+      // 🔹 Fetch Form
       .addCase(fetchForm.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -100,6 +101,34 @@ const formSlice = createSlice({
         state.formData = action.payload;
       })
       .addCase(fetchForm.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+
+      // 🔹 Update Form
+      .addCase(updateForm.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(updateForm.fulfilled, (state, action) => {
+        state.loading = false;
+        state.formData = action.payload;
+      })
+      .addCase(updateForm.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+
+      // 🔹 Soft Delete Form
+      .addCase(deleteForm.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(deleteForm.fulfilled, (state) => {
+        state.loading = false;
+        state.formData = null; // Clear form data after deletion
+      })
+      .addCase(deleteForm.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       });
