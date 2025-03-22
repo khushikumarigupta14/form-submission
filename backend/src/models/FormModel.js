@@ -11,6 +11,7 @@ const formSchema = new mongoose.Schema({
   gender: { type: String, enum: ["male", "female", "other"] },
   subscribe: { type: Boolean, default: false },
   country: { type: String },
+  deleted: { type: Boolean, default: false },
   comments: { type: String },
 });
 
