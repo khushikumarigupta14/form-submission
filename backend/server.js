@@ -10,29 +10,28 @@ dotenv.config();
 const app = express();
 
 // Middleware
+// CORS Middleware - Allow only the frontend URL
 app.use(
   cors({
-    origin: (origin, callback) => {
-      if (!origin || origin === config.frontend_url) {
-        callback(null, true);
-      } else {
-        callback(new Error("Not allowed by CORS"));
-      }
-    },
-    credentials: true,
+    origin: config.frontend_url, // Must match exactly
+    methods: "GET, POST, PUT, DELETE, OPTIONS",
+    allowedHeaders: "Content-Type, Authorization",
+    credentials: true, // Allow cookies & authentication headers
   })
 );
 
+// Handle Preflight Requests
+app.options("*", cors());
+
+// Middleware for Headers
 app.use((req, res, next) => {
   res.header("Access-Control-Allow-Origin", config.frontend_url);
   res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
   res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
   res.header("Access-Control-Allow-Credentials", "true");
-  if (req.method === "OPTIONS") {
-    return res.sendStatus(200);
-  }
   next();
 });
+
 
 app.use(express.json());
 
