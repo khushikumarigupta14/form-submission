@@ -9,29 +9,46 @@ import formRoutes from "./src/User/FormRoutes.js";
 dotenv.config();
 const app = express();
 
-// Middleware
-// CORS Middleware - Allow only the frontend URL
+const allowedOrigins = [
+  config.frontend_url,
+  "http://localhost:5173", // For local testing
+];
+
 app.use(
   cors({
-    origin: config.frontend_url, // Must match exactly
-    methods: "GET, POST, PUT, DELETE, OPTIONS",
-    allowedHeaders: "Content-Type, Authorization",
-    credentials: true, // Allow cookies & authentication headers
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    credentials: true,
   })
 );
 
-// Handle Preflight Requests
-app.options("*", cors());
+// ✅ Handle Preflight Requests (OPTIONS)
+app.options("*", (req, res) => {
+  res.header(
+    "Access-Control-Allow-Origin",
+    allowedOrigins.includes(req.headers.origin) ? req.headers.origin : ""
+  );
+  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  res.header("Access-Control-Allow-Credentials", "true");
+  res.sendStatus(200);
+});
 
-// Middleware for Headers
+// ✅ Additional CORS Headers Middleware
 app.use((req, res, next) => {
-  res.header("Access-Control-Allow-Origin", config.frontend_url);
+  if (allowedOrigins.includes(req.headers.origin)) {
+    res.header("Access-Control-Allow-Origin", req.headers.origin);
+  }
   res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
   res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
   res.header("Access-Control-Allow-Credentials", "true");
   next();
 });
-
 
 app.use(express.json());
 
@@ -40,5 +57,5 @@ app.use("/api/form", formRoutes);
 
 // Connect to MongoDB
 connectDB();
-const port = config.PORT || 5001; 
+const port = config.PORT || 5001;
 app.listen(port, () => console.log(`Server running on port ${port}`));
