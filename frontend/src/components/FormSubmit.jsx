@@ -1,9 +1,10 @@
-import React, { useState } from "react";
-import { submitForm } from "../redux/FormSlice";
-import { useNavigate } from "react-router-dom";
-import { useDispatch } from "react-redux";
+import React, { useEffect, useState } from "react";
+import { fetchForm, submitForm, updateForm } from "../redux/FormSlice";
+import { useNavigate, useParams } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
 
 const FormSubmit = () => {
+  const { id } = useParams();
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -17,6 +18,21 @@ const FormSubmit = () => {
     comments: "",
   });
   const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const { formData: existingFormData } = useSelector((state) => state.form);
+
+  useEffect(() => {
+    if (id) {
+      dispatch(fetchForm(id));
+    }
+  }, [dispatch, id]);
+
+  useEffect(() => {
+    if (id && existingFormData) {
+      setFormData(existingFormData);
+    }
+  }, [existingFormData, id]);
+
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData({
@@ -24,19 +40,24 @@ const FormSubmit = () => {
       [name]: type === "checkbox" ? checked : value,
     });
   };
-  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      // Dispatch the submitForm action
-      const response = await dispatch(submitForm(formData)).unwrap();
-      console.log("Form Data Submitted:", response);
-      navigate(`/form/${response.form._id}`); // Redirect to the form display page
-      alert("Form submitted successfully!");
+      if (id) {
+        // Update existing form
+        await dispatch(updateForm({ id, updatedData: formData })).unwrap();
+        alert("Form updated successfully!");
+      } else {
+        // Submit new form
+        const response = await dispatch(submitForm(formData)).unwrap();
+        navigate(`/form/${response.form._id}`);
+        alert("Form submitted successfully!");
+      }
+      navigate("/");
     } catch (error) {
-      console.error("Error submitting form:", error);
-      alert("Failed to submit form. Please try again.");
+      console.error("Error:", error);
+      alert("Operation failed. Please try again.");
     }
   };
 
@@ -44,7 +65,7 @@ const FormSubmit = () => {
     <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
       <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
         <h1 className="text-2xl font-bold text-blue-600 text-center mb-6">
-          Intern Form
+          {id ? "Edit Intern Form" : "Submit Intern Form"}
         </h1>
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* First Name */}
@@ -70,7 +91,7 @@ const FormSubmit = () => {
             <input
               type="text"
               name="lastName"
-              value={formData.lastName}
+              value={formData.lastName || ""}
               onChange={handleChange}
               required
               className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
@@ -229,7 +250,7 @@ const FormSubmit = () => {
             type="submit"
             className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
           >
-            Submit
+            {id ? "Update" : "Submit"}
           </button>
         </form>
       </div>

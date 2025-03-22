@@ -1,13 +1,12 @@
 import React, { useEffect } from "react";
-import { Link, useParams } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux"; // Import useSelector
-import { fetchForm } from "../redux/FormSlice";
+import { Link, useParams, useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchForm, deleteForm } from "../redux/FormSlice";
 
 const FormDisplay = () => {
-  const { id } = useParams(); // Get the form ID from the URL
+  const { id } = useParams();
   const dispatch = useDispatch();
-
-  // Access Redux state
+  const navigate = useNavigate();
   const { formData, loading, error } = useSelector((state) => state.form);
 
   useEffect(() => {
@@ -15,9 +14,17 @@ const FormDisplay = () => {
       dispatch(fetchForm(id));
     }
   }, [dispatch, id]);
+
   if (!id) return <p>No form ID provided.</p>;
   if (loading) return <p>Loading...</p>;
   if (error) return <p>Error: {error}</p>;
+
+  const handleDelete = async () => {
+    if (window.confirm("Are you sure you want to delete this form?")) {
+      await dispatch(deleteForm(id));
+      navigate("/");
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
@@ -39,23 +46,37 @@ const FormDisplay = () => {
             <strong>Birth Date:</strong> {formData?.birthDate}
           </p>
           <p>
-            <strong>Age:</strong> {formData.age}
+            <strong>Age:</strong> {formData?.age}
           </p>
           <p>
-            <strong>Gender:</strong> {formData.gender}
+            <strong>Gender:</strong> {formData?.gender}
           </p>
           <p>
-            <strong>Subscribe:</strong> {formData.subscribe ? "Yes" : "No"}
+            <strong>Subscribe:</strong> {formData?.subscribe ? "Yes" : "No"}
           </p>
           <p>
-            <strong>Country:</strong> {formData.country}
+            <strong>Country:</strong> {formData?.country}
           </p>
           <p>
-            <strong>Comments:</strong> {formData.comments}
+            <strong>Comments:</strong> {formData?.comments}
           </p>
 
+          <div className="flex justify-between mt-6">
+            <Link to={`/form/edit/${id}`}>
+              <button className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600">
+                Edit
+              </button>
+            </Link>
+            <button
+              className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+              onClick={handleDelete}
+            >
+              Delete
+            </button>
+          </div>
+
           <Link to="/">
-            <button className="text-2xl font-bold text-blue-600 bg-white px-6 py-3 rounded-lg shadow-lg hover:bg-blue-50 transition-colors">
+            <button className="mt-4 text-2xl font-bold text-blue-600 bg-white px-6 py-3 rounded-lg shadow-lg hover:bg-blue-50 transition-colors">
               Go to form page
             </button>
           </Link>

@@ -20,6 +20,7 @@ const App = () => {
         <Routes>
           <Route path="/" element={<FormSubmit />} />
           <Route path="/form/:id" element={<FormDisplay />} />
+          <Route path="/form/edit/:id" element={<FormSubmit />} />
           <Route path="/form/" element={<div>No form ID provided</div>} />
         </Routes>
       </HistoryRouter>
