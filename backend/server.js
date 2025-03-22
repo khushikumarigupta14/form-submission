@@ -15,6 +15,15 @@ app.use(
     origin: config.frontend_url,
   })
 );
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", config.frontend_url);
+  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(200);
+  }
+  next();
+});
 
 app.use(express.json());
 
