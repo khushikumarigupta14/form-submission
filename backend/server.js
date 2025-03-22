@@ -10,7 +10,12 @@ dotenv.config();
 const app = express();
 
 // Middleware
-app.use(cors());
+app.use(
+  cors({
+    origin: config.frontend_url,
+  })
+);
+
 app.use(express.json());
 
 // Routes
