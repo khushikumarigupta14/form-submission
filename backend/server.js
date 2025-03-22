@@ -12,13 +12,22 @@ const app = express();
 // Middleware
 app.use(
   cors({
-    origin: config.frontend_url,
+    origin: (origin, callback) => {
+      if (!origin || origin === config.frontend_url) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    credentials: true,
   })
 );
+
 app.use((req, res, next) => {
   res.header("Access-Control-Allow-Origin", config.frontend_url);
   res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
   res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  res.header("Access-Control-Allow-Credentials", "true");
   if (req.method === "OPTIONS") {
     return res.sendStatus(200);
   }
@@ -32,5 +41,5 @@ app.use("/api/form", formRoutes);
 
 // Connect to MongoDB
 connectDB();
-const port = config.PORT || 5001; // Use a different port
+const port = config.PORT || 5001; 
 app.listen(port, () => console.log(`Server running on port ${port}`));
