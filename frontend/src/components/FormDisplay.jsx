@@ -54,7 +54,7 @@ const FormDisplay = () => {
             <strong>Comments:</strong> {formData.comments}
           </p>
 
-          <Link to="/form">
+          <Link to="/">
             <button className="text-2xl font-bold text-blue-600 bg-white px-6 py-3 rounded-lg shadow-lg hover:bg-blue-50 transition-colors">
               Go to form page
             </button>
