@@ -44,15 +44,23 @@ const FormSubmit = () => {
       setFormData(existingFormData);
     }
   }, [existingFormData, id]);
+  const calculateAge = (birthDate) => {
+    if (!birthDate) return "";
+    const birthYear = new Date(birthDate).getFullYear();
+    const currentYear = new Date().getFullYear();
+    return currentYear - birthYear;
+  };
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData({
       ...formData,
       [name]: type === "checkbox" ? checked : value,
+      ...(name === "birthDate" && { age: calculateAge(value) }),
       ...(name === "country" && { country: countryOptions[value] || "" }),
     });
   };
+
   const validateForm = () => {
     if (!formData.firstName.trim() || !formData.lastName.trim()) {
       toast.error("First Name and Last Name are required!");
